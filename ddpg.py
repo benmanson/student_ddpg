@@ -55,11 +55,8 @@ class DDPG(object):
 		self._policy_optimizer.step()
 
 		# Update actor using sampled policy gradient
-		# Q_grads = torch.autograd.backward(Q)
-		# mu_grads = torch.autograd.backward(self._policy_net(states))
-		# J_grad = torch.mean(Q_grads * mu_grads)
 		self._q_optimizer.zero_grad()
-		(torch.mean(Q * self._policy_net(states))).backward()
+		torch.mean(self._q_net(states, self._policy_net(states)).backward()
 		self._q_optimizer.step()
 
 
