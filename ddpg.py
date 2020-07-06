@@ -44,6 +44,25 @@ class DDPG(object):
 		using the optimizers.
 		'''
 
+		# Find ys and Qs
+		loss = torch.functional.mse_loss()
+		y = rewards + self._discount * self._target_q_net(states_t, self._target_policy_net(states_t))
+		Q = self._q_net(states, actions)
+
+		# Use loss with q_optimizer to optimize critic
+		self._policy_optimizer.zero_grad()
+		loss(y, q).backward()
+		self._policy_optimizer.step()
+
+		# Update actor using sampled policy gradient
+		# Q_grads = torch.autograd.backward(Q)
+		# mu_grads = torch.autograd.backward(self._policy_net(states))
+		# J_grad = torch.mean(Q_grads * mu_grads)
+		self._q_optimizer.zero_grad()
+		(torch.mean(Q * self._policy_net(states))).backward()
+		self._q_optimizer.step()
+
+
 		# Target network updates
 		soft_update_from_to(
 			source=self._policy_net ,
@@ -57,10 +76,10 @@ class DDPG(object):
 		)
 
 def get_optimizer(policy, value):
-  policy_optimizer = torch.optim.Adam( list(policy.parameters()), lr=1e-4)
-  value_optimizer = torch.optim.Adam(list(value.parameters()), lr=1e-3, weight_decay = 1e-3)
+	policy_optimizer = torch.optim.Adam(list(policy.parameters()), lr=1e-4)
+	value_optimizer = torch.optim.Adam(list(value.parameters()), lr=1e-3, weight_decay = 1e-3)
 
-  return policy_optimizer, value_optimizer
+	return policy_optimizer, value_optimizer
 
 def soft_update_from_to(source, target, tau):
 	for target_param, param in zip(target.parameters(), source.parameters()):
