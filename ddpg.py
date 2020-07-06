@@ -38,16 +38,10 @@ class DDPG(object):
 		actions = batch['actions']
 		states_t = batch['next_observations']
 
-		'''
-		Add your code here!
-		Basically, you have to compute the DDPG losses and do the training step
-		using the optimizers.
-		'''
-
 		# Find ys and Qs
 		loss = torch.functional.mse_loss()
 		y = rewards + self._discount * self._target_q_net(states_t, self._target_policy_net(states_t))
-		Q = self._q_net(states, actions)
+		q = self._q_net(states, actions)
 
 		# Use loss with q_optimizer to optimize critic
 		self._policy_optimizer.zero_grad()
