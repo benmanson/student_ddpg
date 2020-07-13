@@ -28,6 +28,8 @@ class DDPG(object):
 			tau=1.0
 		)
 
+		self._criterion = torch.functional.mse_loss()
+
 	def train(self, replay):
 		batch_size = 64
 		batch = replay.random_batch(batch_size)
@@ -38,20 +40,22 @@ class DDPG(object):
 		actions = batch['actions']
 		states_t = batch['next_observations']
 
-		# Find ys and Qs
-		loss = torch.functional.mse_loss()
+		# Find ys ('actual' q vals) and Qs (critic estimates of q vals)
 		y = rewards + self._discount * self._target_q_net(states_t, self._target_policy_net(states_t))
 		q = self._q_net(states, actions)
 
-		# Use loss with q_optimizer to optimize critic
-		self._policy_optimizer.zero_grad()
-		loss(y, q).backward()
-		self._policy_optimizer.step()
+		critic_loss = self._criterion(y, q)
+		actor_loss = self._q_net(states, self._policy_net(states)).mean()
 
-		# Update actor using sampled policy gradient
+		# Optimize critic using MSE of ys and Qs
 		self._q_optimizer.zero_grad()
-		torch.mean(self._q_net(states, self._policy_net(states))).backward()
+		critic_loss.backward()
 		self._q_optimizer.step()
+
+		# Optimize actor using sampled policy gradient
+		self._policy_optimizer.zero_grad()
+		actor_loss.backward()
+		self._policy_optimizer.step()
 
 
 		# Target network updates
