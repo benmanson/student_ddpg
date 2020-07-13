@@ -47,9 +47,9 @@ class DDPG(object):
 		y = rewards + self._discount * self._target_q_net(states_t, self._target_policy_net(states_t))
 		q = self._q_net(states, actions)
 
-		# Find critic loss and actor loss
+		# Find critic loss for critic optimizer and objective for actor optimization
 		critic_loss = self._criterion(y, q)
-		actor_loss = self._q_net(states, self._policy_net(states)).mean()
+		objective = self._q_net(states, self._policy_net(states)).mean()
 
 		# Optimize critic using MSE of ys and Qs
 		self._q_optimizer.zero_grad()
@@ -58,7 +58,7 @@ class DDPG(object):
 
 		# Optimize actor using sampled policy gradient
 		self._policy_optimizer.zero_grad()
-		actor_loss.backward()
+		objective.backward()
 		self._policy_optimizer.step()
 
 		""" END OF MY CODE """
