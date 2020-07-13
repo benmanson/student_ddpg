@@ -40,10 +40,14 @@ class DDPG(object):
 		actions = batch['actions']
 		states_t = batch['next_observations']
 
+
+		""" MY CODE """
+
 		# Find ys ('actual' q vals) and Qs (critic estimates of q vals)
 		y = rewards + self._discount * self._target_q_net(states_t, self._target_policy_net(states_t))
 		q = self._q_net(states, actions)
 
+		# Find critic loss and actor loss
 		critic_loss = self._criterion(y, q)
 		actor_loss = self._q_net(states, self._policy_net(states)).mean()
 
@@ -56,6 +60,8 @@ class DDPG(object):
 		self._policy_optimizer.zero_grad()
 		actor_loss.backward()
 		self._policy_optimizer.step()
+
+		""" END OF MY CODE """
 
 
 		# Target network updates
