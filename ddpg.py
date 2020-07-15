@@ -28,7 +28,7 @@ class DDPG(object):
 			tau=1.0
 		)
 
-		self._criterion = torch.functional.mse_loss()
+		self._criterion = torch.nn.MSELoss()
 
 	def train(self, replay):
 		batch_size = 64
