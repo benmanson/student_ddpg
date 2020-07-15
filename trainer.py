@@ -18,9 +18,9 @@ class Trainer(object):
         observation_dim = self._env.observation_space.low.size
         action_dim = self._env.action_space.low.size
 
-        self._device = 'cpu'
-        # Uncomment if you do trianing on the GPU
-        # self._device = 'cuda:0'
+        # self._device = 'cpu'
+        # Uncomment if you do training on the GPU
+        self._device = 'cuda:0'
 
         hidden_sizes = [256] * 2
         self._q_net = networks.QvalueNetwork(hidden_sizes=hidden_sizes, input_size = observation_dim + action_dim).to(device=self._device)
