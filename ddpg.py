@@ -47,14 +47,16 @@ class DDPG(object):
 		y = rewards + self._discount * self._target_q_net(states_t, self._target_policy_net(states_t))
 		q = self._q_net(states, actions)
 
-		# Find critic loss for critic optimizer and q vals w/ policy for actor optimization
+		# Find critic loss for critic optimizer
 		critic_mse = self._criterion(y, q)
-		q_with_policy = self._q_net(states, self._policy_net(states)).mean()
 
 		# Optimize critic using MSE of ys and Qs
 		self._q_optimizer.zero_grad()
 		critic_mse.backward()
 		self._q_optimizer.step()
+
+		# Find q vals w/ policy actions, and take mean as in paper
+		q_with_policy = -self._q_net(states, self._policy_net(states)).mean()
 
 		# Optimize actor using sampled policy gradient
 		self._policy_optimizer.zero_grad()
