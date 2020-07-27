@@ -56,7 +56,7 @@ class DDPG(object):
 		self._q_optimizer.step()
 
 		# Find q vals w/ policy actions, and take mean as in paper
-		q_with_policy = -self._q_net(states, self._policy_net(states)).mean()
+		q_with_policy = self._q_net(states, self._policy_net(states)).mean()
 
 		# Optimize actor using sampled policy gradient
 		self._policy_optimizer.zero_grad()
